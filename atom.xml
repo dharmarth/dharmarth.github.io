@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title><![CDATA[Dharmarth Shah]]></title>
+  <subtitle><![CDATA[Agileist, Programmer, SysAdmin]]></subtitle>
+  <link href="/atom.xml" rel="self"/>
+  <link href="http://dharmarth.com/"/>
+  <updated>2015-11-08T17:11:52.000Z</updated>
+  <id>http://dharmarth.com/</id>
+  
+  <author>
+    <name><![CDATA[Dharmarth Shah]]></name>
+    
+  </author>
+  
+  <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title><![CDATA[Transferring Files Across Datacenters]]></title>
+    <link href="http://dharmarth.com/2015/11/07/Transferring-Files-Across-Datacenter/"/>
+    <id>http://dharmarth.com/2015/11/07/Transferring-Files-Across-Datacenter/</id>
+    <published>2015-11-07T07:41:29.000Z</published>
+    <updated>2015-11-08T17:11:52.000Z</updated>
+    <content type="html"><![CDATA[<p>To enable team with continuous delivery, one of the thing we wanted to achieve is <strong>Automated Deployments</strong>. Mostly historic, some bureaucracy and some security reasons our project development &amp; deployment is segregated among three disjoint datacenters. </p>
+<ul>
+<li>DatacenterA <ul>
+<li>Hosting various CI environments</li>
+<li>Hosting project management tool</li>
+<li>Code repository</li>
+<li>Deployment artifcats building </li>
+<li>Dedicated to our project</li>
+</ul>
+</li>
+<li>DatacenterB<ul>
+<li>Hosting Staging &amp; Production environment for admin officer facing application component</li>
+<li>Source for users data &amp; related information</li>
+<li>Used by other projects of same client</li>
+</ul>
+</li>
+<li>DatacenterC<ul>
+<li>Hosting Staging &amp; Production environment for user facing application component</li>
+<li>Integrating with few third-parties</li>
+<li>Shared by other agencies</li>
+</ul>
+</li>
+</ul>
+<p>Above datacenters are located at different places, managed by different company and no direct network connectivity with each other. </p>
+<p>However DatacenterB and DatacenterC both provides FTP endpoint for transferring files with few limitations </p>
+<ul>
+<li>Low network bandwidth </li>
+<li>Unreliable Connectivity</li>
+<li>Used by different agencies</li>
+<li>Not recommended for large size(&gt; 10MB) files</li>
+<li>Using commercial non-standard FTP</li>
+</ul>
+<p>DatacenterB provides support for running shell script on their FTP server using centrally controlled mechanism. </p>
+<p><strong>Above limitations comes with challenges - <em>security, reliability,</em> and <em>automated</em> way to transfer deployment files.</strong> </p>
+<p>This is the process we came up with to achieve objective</p>
+<ul>
+<li>In DatacenterA<ul>
+<li>GPG sign individual file</li>
+<li>Create deploy bundle tar</li>
+<li>Split up bundle tar into size of 8MB</li>
+<li>Take MD5 sum of individual chunk</li>
+<li>Encrypt using public key cryptography</li>
+<li>Upload encrypted parts to DatacenterB FTP location X</li>
+</ul>
+</li>
+<li>In DatacenterB<ul>
+<li>Download encrypted files from location X</li>
+<li>Verify MD5 sum</li>
+<li>Join and decrypt deploy bundle</li>
+<li>GPG verify all files </li>
+<li>Upload encrypted files to DatacenterB FTP location Y </li>
+<li>Scheduled file transfer script using centrally controlled mechanism</li>
+<li>Above script upload files to DatacenterC FTP from location Y</li>
+</ul>
+</li>
+<li>In DataceterC<ul>
+<li>Download encrypted files from location X</li>
+<li>Verify MD5 sum</li>
+<li>Join and decrypt deploy bundle</li>
+<li>GPG verify of all files </li>
+</ul>
+</li>
+</ul>
+<p>We do not have direct control/access to FTP server and scheduling mechanism. We faced few difficulties during implementing above process. e.g</p>
+<ul>
+<li>Debugging failures - debugging would happen over emails. Sometime took days to resolve issue</li>
+<li>Making file transfer script robust to handle most of the failure failures e.g connection error, half transfer, corrupted files</li>
+<li>Coming up with right interval to reduce total transfer time</li>
+<li>Making scripts smart to not mess with WIP of other script</li>
+</ul>
+<p>There are some drawback with this approach e.g. lead time for file transfers is more because of schedule base trigger, we do not have access to data on various run, file transfer failure notification is manual process </p>
+]]></content>
+    <summary type="html">
+    <![CDATA[Secure, reliable and automated way to transfer deployment artifact files across datacenters.]]>
+    
+    </summary>
+    
+      <category term="Continuous Delivery" scheme="http://dharmarth.com/tags/Continuous-Delivery/"/>
+    
+      <category term="DevOps" scheme="http://dharmarth.com/tags/DevOps/"/>
+    
+  </entry>
+  
+</feed>
